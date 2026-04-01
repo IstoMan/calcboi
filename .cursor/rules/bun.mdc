@@ -1,0 +1,46 @@
+---
+description: Use Bun for installs, scripts, and CLI; prefer Bun features when helpful
+alwaysApply: true
+---
+
+# Package manager and runtime: Bun
+
+Bun is installed and is the default for this repo. **Do not** use `npm`, `npx`, `yarn`, or `pnpm` unless the user explicitly asks for another tool.
+
+## Commands
+
+| Task | Use |
+|------|-----|
+| Install deps | `bun install` |
+| Add dependency | `bun add <pkg>` / dev: `bun add -d <pkg>` |
+| Remove | `bun remove <pkg>` |
+| Run package.json scripts | `bun run <script>` (e.g. `bun run lint`, `bun run start`) |
+| One-off CLIs | `bunx <pkg> <args>` instead of `npx` |
+| Expo helpers | `bunx expo install <pkg>` (SDK-aligned versions) |
+| Format / lint via script | `bun run format`, `bun run lint` |
+
+## Lockfile and CI
+
+- Commit **`bun.lock`** (and respect it in CI). Do not replace the workflow with another package manager without being asked.
+
+## When Bun-specific features help
+
+- **`bun run`** — fast script execution; use for all npm scripts.
+- **`bunx`** — zero-install style runs for one-shot tools; prefer over `npx`.
+- **`bun --hot` / built-ins** — use when scripting or tooling docs call for Bun’s runner (e.g. long-running dev commands if the project adopts them).
+- **Speed / workspaces** — if the repo grows monorepo-style, prefer Bun workspaces as documented upstream.
+
+## Examples
+
+```bash
+# ❌ npm install left-pad
+# ✅ bun add left-pad
+
+# ❌ npx prettier --write .
+# ✅ bunx prettier --write .
+
+# ❌ npm run lint
+# ✅ bun run lint
+```
+
+If documentation shows `npm`/`npx`, translate to the Bun equivalent above unless the user says otherwise.
