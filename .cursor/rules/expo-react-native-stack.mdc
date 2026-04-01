@@ -1,0 +1,282 @@
+---
+description: Expo, NativeWind, and React Native tech stack standards
+alwaysApply: true
+---
+
+# Expo + React Native Tech Stack Standards
+
+This project uses a modern Expo and React Native stack. **When uncertain about any API or pattern, search official documentation first** rather than guessing or mixing incompatible approaches.
+
+## Core Technologies
+
+- **Expo SDK 54** - Latest Expo managed workflow
+- **React Native 0.81.5** with **React 19.1.0**
+- **NativeWind v4** (latest) - Tailwind CSS for React Native
+- **react-native-safe-area-context 5.6.0** - Safe area handling
+- **react-native-reanimated 4.1.1** - Performant animations
+- **Bun** - Package manager (see bun.mdc rule)
+
+---
+
+## NativeWind v4 Usage
+
+### Setup Pattern
+
+```typescript
+// tailwind.config.js - MUST use nativewind/preset
+module.exports = {
+  content: ['./App.{js,ts,tsx}', './components/**/*.{js,ts,tsx}'],
+  presets: [require('nativewind/preset')], // Required for v4
+  theme: { extend: { /* ... */ } }
+};
+```
+
+### Styling Components
+
+```tsx
+// ✅ CORRECT - className prop
+import { View, Text, Pressable } from 'react-native';
+
+<View className="flex-1 bg-white p-4">
+  <Text className="text-2xl font-bold">Hello</Text>
+  <Pressable className="rounded-lg bg-blue-500 p-3">
+    <Text className="text-white">Press me</Text>
+  </Pressable>
+</View>
+
+// ❌ WRONG - Don't mix style prop with NativeWind
+<View style={{ flex: 1 }} className="bg-white" />
+
+// ⚠️ RARE - Only use style prop when dynamic or non-Tailwind values needed
+<View style={{ transform: [{ rotate: `${angle}deg` }] }} />
+```
+
+### Custom Theme Values
+
+```tsx
+// Define in tailwind.config.js theme.extend
+colors: {
+  'calculator-bg': '#000000',
+  'calculator-operator': '#ff9500',
+}
+
+// Use with className
+<View className="bg-calculator-bg" />
+<Text className="text-calculator-operator" />
+```
+
+### Conditional Styles
+
+```tsx
+// ✅ Template literals for dynamic classes
+<Pressable className={`rounded-full p-5 ${isActive ? 'bg-blue-500' : 'bg-gray-500'}`} />
+
+// ✅ Array join for multiple conditions
+<View className={[
+  'base-classes',
+  isActive && 'active-classes',
+  isDisabled && 'disabled-classes'
+].filter(Boolean).join(' ')} />
+```
+
+---
+
+## Safe Area Context
+
+### Provider Setup
+
+```tsx
+// ✅ CORRECT - Wrap root in SafeAreaProvider
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+        {/* content */}
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+}
+```
+
+### Edge Control
+
+```tsx
+// Control which edges apply insets
+<SafeAreaView edges={['top', 'bottom']} /> // Top and bottom only
+<SafeAreaView edges={['top', 'right', 'bottom', 'left']} /> // All edges
+<SafeAreaView edges={[]} /> // No edges (equivalent to regular View)
+
+// Use useSafeAreaInsets() hook for custom logic
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const insets = useSafeAreaInsets();
+// insets.top, insets.bottom, insets.left, insets.right
+```
+
+---
+
+## Expo Fonts
+
+### Loading Pattern
+
+```tsx
+import { useFonts } from 'expo-font';
+import { Inter_400Regular, Inter_700Bold } from '@expo-google-fonts/inter';
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync(); // Before component
+
+export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null; // Wait for fonts
+  }
+
+  return <YourApp />;
+}
+```
+
+### Using in Tailwind
+
+```javascript
+// tailwind.config.js - Map fonts to Tailwind classes
+fontFamily: {
+  'inter': ['Inter_400Regular'],
+  'inter-bold': ['Inter_700Bold'],
+}
+
+// Use in className
+<Text className="font-inter">Regular text</Text>
+<Text className="font-inter-bold">Bold text</Text>
+```
+
+---
+
+## Expo System UI
+
+```tsx
+import * as SystemUI from 'expo-system-ui';
+
+// Set background color (Android navigation bar)
+useEffect(() => {
+  SystemUI.setBackgroundColorAsync('#000000');
+}, []);
+```
+
+---
+
+## React Native Reanimated
+
+### Basic Animated Value
+
+```tsx
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+
+const scale = useSharedValue(1);
+
+const animatedStyle = useAnimatedStyle(() => ({
+  transform: [{ scale: scale.value }]
+}));
+
+<Animated.View style={animatedStyle} className="bg-blue-500">
+  {/* content */}
+</Animated.View>
+```
+
+### Gesture Handler Integration
+
+If using gestures, install `react-native-gesture-handler` and wrap with `GestureHandlerRootView`.
+
+**When in doubt about Reanimated APIs, check:** https://docs.swmansion.com/react-native-reanimated/
+
+---
+
+## Status Bar
+
+```tsx
+import { StatusBar } from 'expo-status-bar';
+
+// ✅ Use expo-status-bar (not react-native StatusBar)
+<StatusBar style="light" /> // 'light' | 'dark' | 'auto'
+```
+
+---
+
+## Import Patterns
+
+```tsx
+// ✅ Core components from react-native
+import { View, Text, Pressable, ScrollView } from 'react-native';
+
+// ✅ Safe area from react-native-safe-area-context
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// ✅ Animation from react-native-reanimated
+import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
+
+// ✅ Expo modules with 'expo-' prefix
+import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
+import * as SystemUI from 'expo-system-ui';
+import { useFonts } from 'expo-font';
+
+// ❌ WRONG - Don't use react-native StatusBar when expo-status-bar is available
+import { StatusBar } from 'react-native'; // Avoid this
+```
+
+---
+
+## TypeScript Patterns
+
+```tsx
+// ✅ Type props interfaces
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary';
+}
+
+function Button({ title, onPress, variant = 'primary' }: ButtonProps) {
+  return (
+    <Pressable onPress={onPress}>
+      <Text>{title}</Text>
+    </Pressable>
+  );
+}
+```
+
+---
+
+## Documentation Priority
+
+When uncertain about:
+- **NativeWind** → https://www.nativewind.dev/
+- **Expo** → https://docs.expo.dev/
+- **React Native** → https://reactnative.dev/
+- **Reanimated** → https://docs.swmansion.com/react-native-reanimated/
+- **Safe Area Context** → https://github.com/th3rdwave/react-native-safe-area-context
+
+**Never guess or mix patterns from different versions.** Search docs or ask before implementing uncertain APIs.
+
+---
+
+## Common Mistakes to Avoid
+
+❌ Using `react-native` StatusBar instead of `expo-status-bar`
+❌ Mixing `style` prop with NativeWind `className` unnecessarily
+❌ Forgetting `SafeAreaProvider` wrapper
+❌ Using old NativeWind v2/v3 patterns (styled() function)
+❌ Not hiding splash screen after fonts load
+❌ Importing fonts directly instead of via @expo-google-fonts packages
