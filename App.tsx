@@ -14,9 +14,10 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import './global.css';
+import { useCalculator } from 'lib/useCalculator';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Numpad from 'components/Numpad';
 import Display from 'components/Display';
@@ -45,14 +46,7 @@ export default function App() {
     }
   }, [fontsLoaded, fontError]);
 
-  const [buffer, setBuffer] = useState<string>('');
-  const addToBuffer = useCallback((symbol: string) => {
-    if (symbol === 'AC') {
-      setBuffer('')
-    } else {
-      setBuffer((prev) => prev + symbol);
-    }
-  }, []);
+  const { display, onKey } = useCalculator();
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -61,10 +55,10 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        className="flex-1 justify-end items-end bg-calculator-bg"
+        className="flex-1 items-end justify-end bg-calculator-bg"
         edges={['top', 'right', 'bottom', 'left']}>
-        <Display content={buffer} />
-        <Numpad sendNum={addToBuffer} />
+        <Display content={display} />
+        <Numpad onKeyPress={onKey} />
       </SafeAreaView>
       <StatusBar style="light" />
     </SafeAreaProvider>

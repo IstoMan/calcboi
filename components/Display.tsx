@@ -1,7 +1,9 @@
-import { Text } from "react-native";
+import { Text } from 'react-native';
 
-export default function Display({ content = "" }: { content: string }) {
+export default function Display({ content = '' }: { content: string }) {
   return (
-    <Text className="text-calculator-text text-9xl font-inter-semibold mr-4 text-nowrap">{content}</Text>
-  )
+    <Text className="mr-4 text-nowrap font-inter-semibold text-9xl text-calculator-text">
+      {content}
+    </Text>
+  );
 }

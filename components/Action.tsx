@@ -7,13 +7,15 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 
-type ActionVariant = 'number' | 'function' | 'operator';
+import type { KeySymbol } from 'lib/calculator';
+
+export type ActionVariant = 'number' | 'function' | 'operator';
 
 interface ActionProps {
-  symbol: string;
+  symbol: KeySymbol;
   variant: ActionVariant;
   isWide?: boolean;
-  onPress: (buffer: string) => void
+  onPress: (symbol: KeySymbol) => void;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -22,7 +24,7 @@ function Action({ symbol, variant = 'number', isWide = false, onPress }: ActionP
   const pressed = useSharedValue(0);
 
   const handlePress = () => {
-    onPress(symbol)
+    onPress(symbol);
   };
 
   const handlePressIn = () => {
@@ -71,8 +73,7 @@ function Action({ symbol, variant = 'number', isWide = false, onPress }: ActionP
       style={animatedStyle}
       onPress={handlePress}
       onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-    >
+      onPressOut={handlePressOut}>
       <Text className={textClasses}>{symbol}</Text>
     </AnimatedPressable>
   );
