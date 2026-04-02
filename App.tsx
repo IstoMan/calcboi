@@ -14,11 +14,12 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import './global.css';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Numpad from 'components/Numpad';
+import Display from 'components/Display';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,14 +49,17 @@ export default function App() {
     return null;
   }
 
+  const [buffer, setBuffer] = useState("")
+
   return (
     <SafeAreaProvider>
       <SafeAreaView
-        className="flex-1 items-center justify-center bg-calculator-bg"
+        className="flex-1 justify-end items-end bg-calculator-bg"
         edges={['top', 'right', 'bottom', 'left']}>
+        <Display content='1' />
         <Numpad />
-        <StatusBar style="light" />
       </SafeAreaView>
+      <StatusBar style="light" />
     </SafeAreaProvider>
   );
 }
