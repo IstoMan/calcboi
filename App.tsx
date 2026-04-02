@@ -14,7 +14,7 @@ import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import './global.css';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -45,19 +45,26 @@ export default function App() {
     }
   }, [fontsLoaded, fontError]);
 
+  const [buffer, setBuffer] = useState<string>('');
+  const addToBuffer = useCallback((symbol: string) => {
+    if (symbol === 'AC') {
+      setBuffer('')
+    } else {
+      setBuffer((prev) => prev + symbol);
+    }
+  }, []);
+
   if (!fontsLoaded && !fontError) {
     return null;
   }
-
-  const [buffer, setBuffer] = useState("")
 
   return (
     <SafeAreaProvider>
       <SafeAreaView
         className="flex-1 justify-end items-end bg-calculator-bg"
         edges={['top', 'right', 'bottom', 'left']}>
-        <Display content='1' />
-        <Numpad />
+        <Display content={buffer} />
+        <Numpad sendNum={addToBuffer} />
       </SafeAreaView>
       <StatusBar style="light" />
     </SafeAreaProvider>

@@ -13,15 +13,16 @@ interface ActionProps {
   symbol: string;
   variant: ActionVariant;
   isWide?: boolean;
+  onPress: (buffer: string) => void
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function Action({ symbol, variant = 'number', isWide = false }: ActionProps) {
+function Action({ symbol, variant = 'number', isWide = false, onPress }: ActionProps) {
   const pressed = useSharedValue(0);
 
   const handlePress = () => {
-    console.log(`Hello you have pressed ${symbol}`);
+    onPress(symbol)
   };
 
   const handlePressIn = () => {
@@ -33,7 +34,7 @@ function Action({ symbol, variant = 'number', isWide = false }: ActionProps) {
   };
 
   const variantColors = {
-    number: {  base: '#333333', pressed: '#505050' },
+    number: { base: '#333333', pressed: '#505050' },
     function: { base: '#a5a5a5', pressed: '#d4d4d2' },
     operator: { base: '#ff9500', pressed: '#ff9f0a' },
   };
@@ -68,7 +69,7 @@ function Action({ symbol, variant = 'number', isWide = false }: ActionProps) {
     <AnimatedPressable
       className={containerClasses}
       style={animatedStyle}
-      onPress={handlePress} 
+      onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
